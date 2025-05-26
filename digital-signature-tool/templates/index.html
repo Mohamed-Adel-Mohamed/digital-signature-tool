@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Signature and Verification Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #e9ecef;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #495057;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-col {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+
+        .btn-info:hover {
+            box-shadow: 0 8px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .key-display {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .signature-history {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .signature-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4CAF50;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .signature-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .signature-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .cryptographic-analysis {
+            background: linear-gradient(135deg, #ff7b7b, #ff6b6b);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .analysis-section {
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .analysis-section h4 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Digital Signature & Verification Tool</h1>
+            <p>Secure message signing with RSA and ECC cryptography</p>
+        </div>
+
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('key-generation')">Key Generation</button>
+                <button class="tab" onclick="showTab('signing')">Message Signing</button>
+                <button class="tab" onclick="showTab('verification')">Message Verification</button>
+                <button class="tab" onclick="showTab('file-signing')">File Signing</button>
+                <button class="tab" onclick="showTab('file-verification')">File Verification</button>
+                <button class="tab" onclick="showTab('eve-attack')">Eve's Attack Demo</button>
+                <button class="tab" onclick="showTab('analysis')">Cryptographic Analysis</button>
+            </div>
+
+
+            <!-- Key Generation Tab -->
+            <div id="key-generation" class="tab-content active">
+                <h2>🔑 Generate Cryptographic Keys</h2>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="keyType">Key Type:</label>
+                        <select id="keyType">
+                            <option value="RSA">RSA (2048-bit)</option>
+                            <option value="ECC">ECC (SECP256R1)</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label for="userId">User ID:</label>
+                        <input type="text" id="userId" value="alice" placeholder="Enter user identifier">
+                    </div>
+                    <div class="form-col">
+                        <button class="btn" onclick="generateKeys()">Generate Keys</button>
+                    </div>
+                </div>
+
+                <div id="keyResult"></div>
+            </div>
+
+            <!-- Message Signing Tab -->
+            <div id="signing" class="tab-content">
+                <h2>✍️ Sign Messages</h2>
+                
+                <div class="form-group">
+                    <label for="signMessage">Message to Sign:</label>
+                    <textarea id="signMessage" placeholder="Enter your message here...">Hello, this is a test message!</textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="signKeyType">Key Type:</label>
+                        <select id="signKeyType">
+                            <option value="RSA">RSA</option>
+                            <option value="ECC">ECC</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label for="signUserId">User ID:</label>
+                        <input type="text" id="signUserId" value="alice">
+                    </div>
+                    <div class="form-col">
+                        <label for="hashAlgorithm">Hash Algorithm:</label>
+                        <select id="hashAlgorithm">
+                            <option value="SHA256">SHA-256</option>
+                            <option value="SHA1">SHA-1</option>
+                            <option value="MD5">MD5</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="useHash" checked>
+                    <label for="useHash">Use hash function (uncheck for textbook RSA)</label>
+                </div>
+
+                <button class="btn" onclick="signMessage()">Sign Message</button>
+
+                <div id="signResult"></div>
+            </div>
+
+            <!-- Signature Verification Tab -->
+            <div id="verification" class="tab-content">
+                <h2>✅ Verify Signatures</h2>
+                
+                <div class="form-group">
+                    <label for="verifyMessage">Original Message:</label>
+                    <textarea id="verifyMessage" placeholder="Enter the original message..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="verifySignature">Signature:</label>
+                    <textarea id="verifySignature" placeholder="Enter the signature to verify..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="verifyKeyType">Key Type:</label>
+                        <select id="verifyKeyType">
+                            <option value="RSA">RSA</option>
+                            <option value="ECC">ECC</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label for="verifyUserId">User ID:</label>
+                        <input type="text" id="verifyUserId" value="alice">
+                    </div>
+                    <div class="form-col">
+                        <label for=""verifyHashAlgorithm">Hash Algorithm:</label>
+                        <select id="verifyHashAlgorithm">
+                            <option value="SHA256">SHA-256</option>
+                            <option value="SHA1">SHA-1</option>
+                            <option value="MD5">MD5</option>
+                        </select>
+                    </div>
+                </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="verifyUseHash" checked>
+                <label for="verifyUseHash">Use hash function (uncheck for textbook RSA)</label>
+            </div>
+
+            <button class="btn" onclick="verifySignature()">Verify Signature</button>
+
+            <div id="verifyResult"></div>
+        </div>
+
+        <!-- File Signing Tab -->
+        <div id="file-signing" class="tab-content">
+            <h2>📁 Sign Files</h2>
+            
+            <div class="form-group">
+                <label for="signFile">Select File to Sign:</label>
+                <input type="file" id="signFile" accept="*/*">
+                <small>You can sign any type of file (documents, images, videos, etc.)</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="signFileKeyType">Key Type:</label>
+                    <select id="signFileKeyType">
+                        <option value="RSA">RSA</option>
+                        <option value="ECC">ECC</option>
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label for="signFileUserId">User ID:</label>
+                    <input type="text" id="signFileUserId" value="alice">
+                </div>
+                <div class="form-col">
+                    <label for="signFileHashAlgorithm">Hash Algorithm:</label>
+                    <select id="signFileHashAlgorithm">
+                        <option value="SHA256">SHA-256</option>
+                        <option value="SHA1">SHA-1</option>
+                        <option value="MD5">MD5</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="signFileUseHash" checked>
+                <label for="signFileUseHash">Use hash function (uncheck for textbook RSA)</label>
+            </div>
+
+            <button class="btn" onclick="signFile()">Sign File</button>
+
+            <div id="signFileResult"></div>
+        </div>
+
+        <!-- File Verification Tab -->
+        <div id="file-verification" class="tab-content">
+            <h2>🔍 Verify File Signatures</h2>
+            
+            <div class="form-group">
+                <label for="verifyFile">Select File to Verify:</label>
+                <input type="file" id="verifyFile" accept="*/*">
+                <small>Upload the original file to verify its signature</small>
+            </div>
+
+            <div class="form-group">
+                <label for="verifyFileSignature">File Signature:</label>
+                <textarea id="verifyFileSignature" placeholder="Enter the file signature to verify..."></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-col">
+                    <label for="verifyFileKeyType">Key Type:</label>
+                    <select id="verifyFileKeyType">
+                        <option value="RSA">RSA</option>
+                        <option value="ECC">ECC</option>
+                    </select>
+                </div>
+                <div class="form-col">
+                    <label for="verifyFileUserId">User ID:</label>
+                    <input type="text" id="verifyFileUserId" value="alice">
+                </div>
+                <div class="form-col">
+                    <label for="verifyFileHashAlgorithm">Hash Algorithm:</label>
+                    <select id="verifyFileHashAlgorithm">
+                        <option value="SHA256">SHA-256</option>
+                        <option value="SHA1">SHA-1</option>
+                        <option value="MD5">MD5</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="verifyFileUseHash" checked>
+                <label for="verifyFileUseHash">Use hash function (uncheck for textbook RSA)</label>
+            </div>
+
+            <button class="btn" onclick="verifyFile()">Verify File Signature</button>
+
+            <div id="verifyFileResult"></div>
+        </div>
+
+
+
+        <!-- Eve's Attack Demo Tab -->
+        <div id="eve-attack" class="tab-content">
+            <h2>🕵️ Eve's Attack Demonstration</h2>
+            
+            <div class="cryptographic-analysis">
+                <h3>Attack Scenario: Signature Forgery</h3>
+                <p><strong>Problem:</strong> Eve wants to produce Alice's signature on message m = 123456789</p>
+                <p><strong>Why is this difficult?</strong> Eve must solve the RSA problem: given (n, e) and target message m, find s such that s^e ≡ m (mod n). This requires computing the e-th root modulo n, which is computationally infeasible without knowing the private key factors.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="targetSignature">Target Signature (Eve's goal):</label>
+                <input type="number" id="targetSignature" value="112090305" placeholder="Enter target signature value">
+                <small>Default: 112090305 (represents "ALICE" where A=01, L=12, I=09, C=03, E=05)</small>
+            </div>
+
+            <div class="form-group">
+                <label for="attackUserId">Alice's User ID:</label>
+                <input type="text" id="attackUserId" value="alice">
+            </div>
+
+            <button class="btn btn-danger" onclick="demonstrateEveAttack()">Demonstrate Attack</button>
+
+            <div id="attackResult"></div>
+        </div>
+
+        <!-- Cryptographic Analysis Tab -->
+        <div id="analysis" class="tab-content">
+            <h2>🔬 Cryptographic Analysis</h2>
+            
+            <div class="analysis-section">
+                <h4>RSA Signature Security (without hash)</h4>
+                <p><strong>The Hard Problem:</strong> The security of RSA signatures relies on the <em>RSA Problem</em> - given (n, e, c), find m such that m^e ≡ c (mod n).</p>
+                <p><strong>Why Eve can't easily forge:</strong> Without the private exponent d, Eve cannot directly compute valid signatures. The computational difficulty lies in:</p>
+                <ul>
+                    <li>Integer factorization of the modulus n</li>
+                    <li>Computing discrete logarithms in Z_n*</li>
+                    <li>Solving the RSA assumption</li>
+                </ul>
+            </div>
+
+            <div class="analysis-section">
+                <h4>Eve's Signature-to-Message Attack</h4>
+                <p><strong>Attack Method:</strong> Instead of trying to forge a signature for a specific message, Eve chooses a signature s and computes the corresponding message m = s^e mod n.</p>
+                <p><strong>Why this works:</strong> In textbook RSA, verification only checks if m ≡ s^e (mod n). Eve can pick any s and compute the matching m.</p>
+                <p><strong>Prevention:</strong> Use cryptographic hash functions and proper padding schemes (PSS, OAEP) to prevent this attack.</p>
+            </div>
+
+            <div class="analysis-section">
+                <h4>Hash Functions in Digital Signatures</h4>
+                <p><strong>Purpose:</strong> Hash functions provide:</p>
+                <ul>
+                    <li>Message integrity verification</li>
+                    <li>Resistance to existential forgery</li>
+                    <li>Binding between message content and signature</li>
+                    <li>Prevention of signature-to-message attacks</li>
+                </ul>
+            </div>
+
+            <div class="analysis-section">
+                <h4>This project made by :</h4>
+                <ul>
+                    <li>Mohamed Adel Mohamed </li>
+                    <li>Youssef Mohamed Kamaleldin</li>
+                </ul>
+         </div>
+
+            <button class="btn btn-info" onclick="loadCryptographicAnalysis()">Load Detailed Analysis</button>
+            <div id="detailedAnalysis"></div>
+        </div>
+
+            <!-- Signature History -->
+            <div class="signature-history">
+                <h3>📝 Signature History</h3>
+                <button class="btn btn-info" onclick="loadSignatureHistory()">Refresh History</button>
+                <div id="signatureHistory"></div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+            // Tab switching functionality
+            function showTab(tabName) {
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                // Show selected tab content
+                document.getElementById(tabName).classList.add('active');
+                
+                // Add active class to clicked tab
+                event.target.classList.add('active');
+            }
+
+            // Generate cryptographic keys
+            async function generateKeys() {
+                const keyType = document.getElementById('keyType').value;
+                const userId = document.getElementById('userId').value;
+                const resultDiv = document.getElementById('keyResult');
+                
+                if (!userId.trim()) {
+                    showResult(resultDiv, 'Please enter a user ID', 'error');
+                    return;
+                }
+                
+                try {
+                    showResult(resultDiv, 'Generating keys... <span class="loading"></span>', 'info');
+                    
+                    const response = await fetch('/generate_keys', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            key_type: keyType,
+                            user_id: userId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const result = `
+                            <h4>✅ Keys Generated Successfully for ${userId}</h4>
+                            <p><strong>Key Type:</strong> ${keyType}</p>
+                            
+                            <h5>Public Key:</h5>
+                            <div class="key-display">${data.public_key}</div>
+                            
+                            <h5>Private Key:</h5>
+                            <div class="key-display">${data.private_key}</div>
+                            
+                            <p><small>⚠️ Keep your private key secure and never share it!</small></p>
+                        `;
+                        showResult(resultDiv, result, 'success');
+                    } else {
+                        showResult(resultDiv, `❌ Error: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+            }
+
+            // Sign message
+            async function signMessage() {
+                const message = document.getElementById('signMessage').value;
+                const keyType = document.getElementById('signKeyType').value;
+                const userId = document.getElementById('signUserId').value;
+                const hashAlgorithm = document.getElementById('hashAlgorithm').value;
+                const useHash = document.getElementById('useHash').checked;
+                const resultDiv = document.getElementById('signResult');
+                
+                if (!message.trim() || !userId.trim()) {
+                    showResult(resultDiv, 'Please enter both message and user ID', 'error');
+                    return;
+                }
+                
+                try {
+                    showResult(resultDiv, 'Signing message... <span class="loading"></span>', 'info');
+                    
+                    const response = await fetch('/sign_message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            key_type: keyType,
+                            user_id: userId,
+                            hash_algorithm: hashAlgorithm,
+                            use_hash: useHash
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const result = `
+                            <h4>✅ Message Signed Successfully</h4>
+                            <p><strong>User:</strong> ${userId}</p>
+                            <p><strong>Key Type:</strong> ${keyType}</p>
+                            <p><strong>Hash Algorithm:</strong> ${useHash ? hashAlgorithm : 'None (Textbook RSA)'}</p>
+                            <p><strong>Record ID:</strong> ${data.record_id}</p>
+                            
+                            <h5>Original Message:</h5>
+                            <div class="key-display">${message}</div>
+                            
+                            <h5>${useHash ? 'Message Hash:' : 'Message as Integer:'}</h5>
+                            <div class="key-display">${data.message_hash}</div>
+                            
+                            <h5>Digital Signature:</h5>
+                            <div class="key-display">${data.signature}</div>
+                        `;
+                        showResult(resultDiv, result, 'success');
+                    } else {
+                        showResult(resultDiv, `❌ Error: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+            }
+
+            // Verify signature
+            async function verifySignature() {
+                const message = document.getElementById('verifyMessage').value;
+                const signature = document.getElementById('verifySignature').value;
+                const keyType = document.getElementById('verifyKeyType').value;
+                const userId = document.getElementById('verifyUserId').value;
+                const hashAlgorithm = document.getElementById('verifyHashAlgorithm').value;
+                const useHash = document.getElementById('verifyUseHash').checked;
+                const resultDiv = document.getElementById('verifyResult');
+                
+                if (!message.trim() || !signature.trim() || !userId.trim()) {
+                    showResult(resultDiv, 'Please enter message, signature, and user ID', 'error');
+                    return;
+                }
+                
+                try {
+                    showResult(resultDiv, 'Verifying signature... <span class="loading"></span>', 'info');
+                    
+                    const response = await fetch('/verify_signature', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            signature: signature,
+                            key_type: keyType,
+                            user_id: userId,
+                            hash_algorithm: hashAlgorithm,
+                            use_hash: useHash
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const isValid = data.is_valid;
+                        const result = `
+                            <h4>${isValid ? '✅ Signature Valid' : '❌ Signature Invalid'}</h4>
+                            <p><strong>Verification Result:</strong> ${isValid ? 'PASSED' : 'FAILED'}</p>
+                            <p><strong>User:</strong> ${userId}</p>
+                            <p><strong>Key Type:</strong> ${keyType}</p>
+                            <p><strong>Hash Algorithm:</strong> ${useHash ? hashAlgorithm : 'None (Textbook RSA)'}</p>
+                            
+                            <p><strong>Interpretation:</strong> ${isValid ? 
+                                'The signature is authentic and the message has not been tampered with.' : 
+                                'The signature is invalid. Either the message was modified, the signature is incorrect, or the wrong key was used.'
+                            }</p>
+                        `;
+                        showResult(resultDiv, result, isValid ? 'success' : 'error');
+                    } else {
+                        showResult(resultDiv, `❌ Error: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+            }
+
+            // Demonstrate Eve's attack
+            async function demonstrateEveAttack() {
+                const targetSignature = document.getElementById('targetSignature').value;
+                const userId = document.getElementById('attackUserId').value;
+                const resultDiv = document.getElementById('attackResult');
+                
+                if (!targetSignature || !userId.trim()) {
+                    showResult(resultDiv, 'Please enter target signature and user ID', 'error');
+                    return;
+                }
+                
+                try {
+                    showResult(resultDiv, 'Demonstrating attack... <span class="loading"></span>', 'info');
+                    
+                    const response = await fetch('/eve_attack', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            target_signature: parseInt(targetSignature),
+                            user_id: userId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const result = `
+                            <h4>🕵️ Eve's Attack Successful!</h4>
+                            
+                            <div class="analysis-section">
+                                <h5>Attack Results:</h5>
+                                <p><strong>Target Signature:</strong> ${data.signature}</p>
+                                <p><strong>Computed Message:</strong> ${data.message}</p>
+                                <p><strong>Verification:</strong> ${data.is_valid ? '✅ Valid' : '❌ Invalid'}</p>
+                            </div>
+                            
+                            <div class="analysis-section">
+                                <h5>How Eve Did It:</h5>
+                                <p>${data.explanation}</p>
+                                <p><strong>Mathematical Operation:</strong> m = s^e mod n</p>
+                                <p><strong>Why This Works:</strong> In textbook RSA, verification only checks if the equation m ≡ s^e (mod n) holds true. Eve can choose any signature value and compute the corresponding message.</p>
+                            </div>
+                            
+                            <div class="analysis-section">
+                                <h5>Security Implications:</h5>
+                                <p>This demonstrates why textbook RSA is vulnerable to existential forgery attacks. The attacker can create valid message-signature pairs without knowing the private key.</p>
+                                <p><strong>Defense:</strong> Always use cryptographic hash functions and proper padding schemes!</p>
+                            </div>
+                        `;
+                        showResult(resultDiv, result, 'success');
+                    } else {
+                        showResult(resultDiv, `❌ Error: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+            }
+
+            // Load cryptographic analysis
+            async function loadCryptographicAnalysis() {
+                const resultDiv = document.getElementById('detailedAnalysis');
+                
+                try {
+                    showResult(resultDiv, 'Loading analysis... <span class="loading"></span>', 'info');
+                    
+                    const response = await fetch('/cryptographic_analysis');
+                    const data = await response.json();
+                    
+                    const result = `
+                        <div class="analysis-section">
+                            <h4>RSA Problem Analysis</h4>
+                            <p><strong>Problem:</strong> ${data.rsa_without_hash_vulnerability.problem}</p>
+                            <p><strong>Difficulty:</strong> ${data.rsa_without_hash_vulnerability.difficulty}</p>
+                            <p><strong>Explanation:</strong> ${data.rsa_without_hash_vulnerability.explanation}</p>
+                            <p><strong>Mathematical Foundation:</strong> ${data.rsa_without_hash_vulnerability.mathematical_foundation}</p>
+                        </div>
+                        
+                        <div class="analysis-section">
+                            <h4>Eve's Attack Analysis</h4>
+                            <p><strong>Technique:</strong> ${data.eve_attack_method.technique}</p>
+                            <p><strong>Method:</strong> ${data.eve_attack_method.method}</p>
+                            <p><strong>Why It Works:</strong> ${data.eve_attack_method.why_it_works}</p>
+                            <p><strong>Prevention:</strong> ${data.eve_attack_method.prevention}</p>
+                        </div>
+                    `;
+                    
+                    showResult(resultDiv, result, 'info');
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+            }
+
+            // Load signature history
+            async function loadSignatureHistory() {
+                const resultDiv = document.getElementById('signatureHistory');
+                
+                try {
+                    const response = await fetch('/get_signatures');
+                    const data = await response.json();
+                    
+                    if (data.signatures && data.signatures.length > 0) {
+                        let historyHtml = '';
+                        data.signatures.reverse().forEach(sig => {
+                            historyHtml += `
+                                <div class="signature-item">
+                                    <div class="signature-meta">
+                                        <span><strong>ID:</strong> ${sig.id} | <strong>User:</strong> ${sig.user_id} | <strong>Type:</strong> ${sig.key_type}</span>
+                                        <span>${new Date(sig.timestamp).toLocaleString()}</span>
+                                    </div>
+                                    <p><strong>Message:</strong> ${sig.message}</p>
+                                    <p><strong>Hash Algorithm:</strong> ${sig.use_hash ? sig.hash_algorithm : 'None (Textbook RSA)'}</p>
+                                    <p><strong>Signature:</strong> <code>${sig.signature.substring(0, 50)}${sig.signature.length > 50 ? '...' : ''}</code></p>
+                                </div>
+                            `;
+                        });
+                        resultDiv.innerHTML = historyHtml;
+                    } else {
+                        resultDiv.innerHTML = '<p>No signatures found. Start by signing some messages!</p>';
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Error loading history: ${error.message}`, 'error');
+                }
+            }
+
+            // Utility function to display results
+            function showResult(element, message, type) {
+                element.innerHTML = `<div class="result ${type}">${message}</div>`;
+            }
+
+            // Load signature history on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                loadSignatureHistory();
+            });
+
+            // Sign file
+            async function signFile() {
+                const fileInput = document.getElementById('signFile');
+                const keyType = document.getElementById('signFileKeyType').value;
+                const userId = document.getElementById('signFileUserId').value;
+                const hashAlgorithm = document.getElementById('signFileHashAlgorithm').value;
+                const useHash = document.getElementById('signFileUseHash').checked;
+                const resultDiv = document.getElementById('signFileResult');
+                
+                if (!fileInput.files[0]) {
+                    showResult(resultDiv, 'Please select a file to sign', 'error');
+                    return;
+                }
+                
+                if (!userId.trim()) {
+                    showResult(resultDiv, 'Please enter a user ID', 'error');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                
+                try {
+                    showResult(resultDiv, `Signing file "${file.name}"... <span class="loading"></span>`, 'info');
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('key_type', keyType);
+                    formData.append('user_id', userId);
+                    formData.append('hash_algorithm', hashAlgorithm);
+                    formData.append('use_hash', useHash.toString());
+                    
+                    const response = await fetch('/sign_file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const result = `
+                            <h4>✅ File Signed Successfully</h4>
+                            <p><strong>User:</strong> ${userId}</p>
+                            <p><strong>Key Type:</strong> ${keyType}</p>
+                            <p><strong>Hash Algorithm:</strong> ${useHash ? hashAlgorithm : 'None (Textbook RSA)'}</p>
+                            <p><strong>Record ID:</strong> ${data.record_id}</p>
+                            
+                            <h5>File Information:</h5>
+                            <div class="key-display">
+                                <strong>Name:</strong> ${data.file_info.filename}<br>
+                                <strong>Size:</strong> ${data.file_info.size_readable}<br>
+                                <strong>Type:</strong> ${data.file_info.type}
+                            </div>
+                            
+                            <h5>${useHash ? 'File Hash:' : 'File Data (first 8 bytes as integer):'}</h5>
+                            <div class="key-display">${data.file_hash}</div>
+                            
+                            <h5>Digital Signature:</h5>
+                            <div class="key-display">${data.signature}</div>
+                            
+                            <p><small>💡 Save this signature to verify the file later!</small></p>
+                        `;
+                        showResult(resultDiv, result, 'success');
+                    } else {
+                        showResult(resultDiv, `❌ Error: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+            }
+
+            // Verify file signature
+            async function verifyFile() {
+                const fileInput = document.getElementById('verifyFile');
+                const signature = document.getElementById('verifyFileSignature').value;
+                const keyType = document.getElementById('verifyFileKeyType').value;
+                const userId = document.getElementById('verifyFileUserId').value;
+                const hashAlgorithm = document.getElementById('verifyFileHashAlgorithm').value;
+                const useHash = document.getElementById('verifyFileUseHash').checked;
+                const resultDiv = document.getElementById('verifyFileResult');
+                
+                if (!fileInput.files[0]) {
+                    showResult(resultDiv, 'Please select a file to verify', 'error');
+                    return;
+                }
+                
+                if (!signature.trim()) {
+                    showResult(resultDiv, 'Please enter the signature to verify', 'error');
+                    return;
+                }
+                
+                if (!userId.trim()) {
+                    showResult(resultDiv, 'Please enter a user ID', 'error');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                
+                try {
+                    showResult(resultDiv, `Verifying signature for "${file.name}"... <span class="loading"></span>`, 'info');
+                    
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('signature', signature);
+                    formData.append('key_type', keyType);
+                    formData.append('user_id', userId);
+                    formData.append('hash_algorithm', hashAlgorithm);
+                    formData.append('use_hash', useHash.toString());
+                    
+                    const response = await fetch('/verify_file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const isValid = data.is_valid;
+                        const result = `
+                            <h4>${isValid ? '✅ File Signature Valid' : '❌ File Signature Invalid'}</h4>
+                            <p><strong>Verification Result:</strong> ${isValid ? 'PASSED' : 'FAILED'}</p>
+                            <p><strong>User:</strong> ${userId}</p>
+                            <p><strong>Key Type:</strong> ${keyType}</p>
+                            <p><strong>Hash Algorithm:</strong> ${useHash ? hashAlgorithm : 'None (Textbook RSA)'}</p>
+                            
+                            <h5>File Information:</h5>
+                            <div class="key-display">
+                                <strong>Name:</strong> ${data.file_info.filename}<br>
+                                <strong>Size:</strong> ${data.file_info.size_readable}<br>
+                                <strong>Type:</strong> ${data.file_info.type}
+                            </div>
+                            
+                            <p><strong>Interpretation:</strong> ${isValid ? 
+                                'The signature is authentic and the file has not been tampered with. The file integrity is verified.' : 
+                                'The signature is invalid. Either the file was modified, the signature is incorrect, or the wrong key was used.'
+                            }</p>
+                            
+                            <div class="analysis-section">
+                                <h5>Security Notes:</h5>
+                                <p>• File signatures ensure both <strong>authenticity</strong> (who created it) and <strong>integrity</strong> (file hasn't been modified)</p>
+                                <p>• Any change to the file content will invalidate the signature</p>
+                                <p>• Always verify file signatures before trusting important documents</p>
+                            </div>
+                        `;
+                        showResult(resultDiv, result, isValid ? 'success' : 'error');
+                    } else {
+                        showResult(resultDiv, `❌ Error: ${data.error}`, 'error');
+                    }
+                } catch (error) {
+                    showResult(resultDiv, `❌ Network Error: ${error.message}`, 'error');
+                }
+}
+        </script>
+    </body>
+</html>
