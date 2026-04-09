@@ -28,8 +28,3 @@ A simple web app to generate cryptographic keys and sign/verify messages and fil
    ```
    http://localhost:5000
    ```
-
-## Authors
-
-* Mohamed Adel Mohamed
-* Youssef Mohamed Kamaleldin
